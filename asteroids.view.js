@@ -100,49 +100,49 @@ ASTEROIDS.View = {
   screenWrap: function screenWrap(obj){
     // Bottom right corner
     if(obj.x + obj.radius >= this.width && obj.y + obj.radius >= this.height){
-      console.log("off the bottom right");
+      // console.log("off the bottom right");
       this.astrdContext.beginPath();
       this.astrdContext.arc(obj.x-this.width, obj.y-this.height, obj.radius, 0, Math.PI*2);
       this.astrdContext.stroke();
       // Top right Corner
     } else if(obj.x + obj.radius >= this.width && obj.y - obj.radius <= 0){
-      console.log("off the top right");
+      // console.log("off the top right");
       this.astrdContext.beginPath();
       this.astrdContext.arc(obj.x-this.width, obj.y+this.height, obj.radius, 0, Math.PI*2);
       this.astrdContext.stroke();
       // Top Left Corner
     } else if(obj.x - obj.radius <= 0 && obj.y - obj.radius <= 0){
-      console.log("off the top left");
+      // console.log("off the top left");
       this.astrdContext.beginPath();
       this.astrdContext.arc(obj.x+this.width, obj.y+this.height, obj.radius, 0, Math.PI*2);
       this.astrdContext.stroke();
       // Bottom Left Corner
     } else if(obj.x - obj.radius <= 0 && obj.y + obj.radius >= this.height){
-      console.log("off the bottom left");
+      // console.log("off the bottom left");
       this.astrdContext.beginPath();
       this.astrdContext.arc(obj.x+this.width, obj.y-this.height, obj.radius, 0, Math.PI*2);
       this.astrdContext.stroke();
       // Right Side
     } else if(obj.x + obj.radius >= this.width){
-      console.log("off the right");
+      // console.log("off the right");
       this.astrdContext.beginPath();
       this.astrdContext.arc(obj.x-this.width, obj.y, obj.radius, 0, Math.PI*2);
       this.astrdContext.stroke();
       // Left Side
     } else if(obj.x - obj.radius <= 0) {
-      console.log("off the left side");
+      // console.log("off the left side");
       this.astrdContext.beginPath();
       this.astrdContext.arc(obj.x+this.width, obj.y, obj.radius, 0, Math.PI*2);
       this.astrdContext.stroke();
       // Bottom Side
     } else if(obj.y + obj.radius >= this.height) {
-      console.log("off the bottom");
+      // console.log("off the bottom");
       this.astrdContext.beginPath();
       this.astrdContext.arc(obj.x, obj.y-this.height, obj.radius, 0, Math.PI*2);
       this.astrdContext.stroke();
       // Top Side
     } else if(obj.y - obj.radius <= 0) {
-      console.log("off the top");
+      // console.log("off the top");
       this.astrdContext.beginPath();
       this.astrdContext.arc(obj.x, obj.y+this.height, obj.radius, 0, Math.PI*2);
       this.astrdContext.stroke();

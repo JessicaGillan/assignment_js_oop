@@ -9,6 +9,7 @@ ASTEROIDS.Model = {
     this.width = options.width || window.innerWidth;
     this.height = options.height || window.innerHeight;
     this.ship = new this.Ship();
+    this.ship.setVertices()
     this.asteroids = [];
     this.initAsteroids(options.num);
   },
@@ -21,13 +22,18 @@ ASTEROIDS.Model = {
     }
   },
   checkCollision: function checkCollision() {
-    var ship = new SAT.Polygon(new SAT.Vector(this.ship.vertices[0][0], this.ship.vertices[0][1]),
-                               [new SAT.Vector(this.ship.vertices[0][0], this.ship.vertices[0][1]),
-                                new SAT.Vector(this.ship.vertices[1][0], this.ship.vertices[1][1]),
-                                new SAT.Vector(this.ship.vertices[3][0], this.ship.vertices[3][1])] )
-    var circles;
-    for (var i = 0; i < this.asteroids.length; i++){
-      circles.push( new SAT.circle(new SAT.Vector(this.asteroids[i].x, this.asteroids[i].y, this.asteroids[i].radius)) );
+    var ship = new SAT.Polygon(new SAT.Vector(ASTEROIDS.Model.ship.vertices[0][0], ASTEROIDS.Model.ship.vertices[0][1]),
+                               [new SAT.Vector(ASTEROIDS.Model.ship.vertices[0][0], ASTEROIDS.Model.ship.vertices[0][1]),
+                                new SAT.Vector(ASTEROIDS.Model.ship.vertices[1][0], ASTEROIDS.Model.ship.vertices[1][1]),
+                                new SAT.Vector(ASTEROIDS.Model.ship.vertices[3][0], ASTEROIDS.Model.ship.vertices[3][1])] )
+
+    var circle;
+    for (var i = 0; i < ASTEROIDS.Model.asteroids.length; i++){
+      circle =  new SAT.Circle(new SAT.Vector(ASTEROIDS.Model.asteroids[i].x, ASTEROIDS.Model.asteroids[i].y, ASTEROIDS.Model.asteroids[i].radius));
+      if(SAT.testPolygonCircle( ship, circle )){
+        console.log("collide!")
+      }
+
     }
 
     // SAT.testPolygonCircle( ship, circle);

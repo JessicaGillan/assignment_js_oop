@@ -20,6 +20,7 @@ ASTEROIDS.Controller = {
     this.model.moveAsteroids();
     this.view.renderAsteroids(this.model.asteroids);
     this.model.moveShip();
+    this.model.checkCollision();
     this.model.ship.setVertices();
     this.view.renderShip(this.model.ship);
   }
