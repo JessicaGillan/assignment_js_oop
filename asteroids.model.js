@@ -23,7 +23,7 @@ ASTEROIDS.Model = {
   checkCollision: function checkCollision() {
     var ship = new SAT.Polygon(new SAT.Vector(this.ship.vertices[0][0], this.ship.vertices[0][1]),
                                [new SAT.Vector(this.ship.vertices[0][0], this.ship.vertices[0][1]),
-                                new SAT.Vector(this.ship.vertices[1][0], this.ship.vertices[1][1]]),
+                                new SAT.Vector(this.ship.vertices[1][0], this.ship.vertices[1][1]),
                                 new SAT.Vector(this.ship.vertices[3][0], this.ship.vertices[3][1])] )
     var circles;
     for (var i = 0; i < this.asteroids.length; i++){
