@@ -15,78 +15,60 @@ ASTEROIDS.Model = {
   },
   keys: [],
   initAsteroids: function initAsteroids(num) {
-    num = Math.max((num || 3), 1);
+    num = Math.max((num || 20), 1);
 
     for(var i=0; i < num; i++){
       this.addAsteroid();
     }
   },
-  pointCircleCollide: function pointCircleCollide(point, circle, r) {
-    if (r===0) return false
-    var dx = circle[0] - point[0]
-    var dy = circle[1] - point[1]
-    return dx * dx + dy * dy <= r * r
-  },
-  lineCircleCollide: function lineCircleCollide(line, circle, radius) {
-    var a = line[0],
-        b = line[1]
-    //check to see if start or end points lie within circle
-    if (this.pointCircleCollide(a, circle, radius)) {
-      return true
-    } if (this.pointCircleCollide(b, circle, radius)) {
-      return true
-    }
+  checkCollision: function checkCollision(asteroid) {
+    // Make a Boundary Triangle using the asteroid's radius
+    var boundaryVertices = this.ship.getBoundaryVertices(asteroid.radius)
 
-    var x1 = a[0],
-        y1 = a[1],
-        x2 = b[0],
-        y2 = b[1],
-        cx = circle[0],
-        cy = circle[1];
+    // Find the max and min x points of boundary to trigger collision check
+    var maxX = Math.max(boundaryVertices[0][0],boundaryVertices[1][0],boundaryVertices[2][0]),
+        minX = Math.min(boundaryVertices[0][0],boundaryVertices[1][0],boundaryVertices[2][0]),
+        maxY = Math.max(boundaryVertices[0][1],boundaryVertices[1][1],boundaryVertices[2][1]),
+        minY = Math.min(boundaryVertices[0][1],boundaryVertices[1][1],boundaryVertices[2][1]);
 
-    //vector d
-    var dx = x2 - x1
-    var dy = y2 - y1
 
-    //vector lc
-    var lcx = cx - x1
-    var lcy = cy - y1
+    // if Asteroid center has crossed x boundary on either side
+    if ((asteroid.x < maxX && asteroid.x > minX) && (asteroid.y < maxY && asteroid.y > minY)) {
+      var asterX = asteroid.x;
+      var lines = [
+        [boundaryVertices[0], boundaryVertices[1]],
+        [boundaryVertices[1], boundaryVertices[2]],
+        [boundaryVertices[0], boundaryVertices[2]]
+      ]
 
-    //project lc onto d, resulting in vector p
-    var dLen2 = dx * dx + dy * dy //len2 of d
-    var px = dx
-    var py = dy
-    if (dLen2 > 0) {
-      var dp = (lcx * dx + lcy * dy) / dLen2
-      px *= dp
-      py *= dp
-    }
+      var xCoords = new Array(2),
+          xCoord;
 
-    var nearest = []
-    nearest[0] = x1 + px
-    nearest[1] = y1 + py
-
-    //len2 of p
-    var pLen2 = px * px + py * py
-
-    //check collision
-    return this.pointCircleCollide(nearest, circle, radius)
-    && pLen2 <= dLen2 && (px * dx + py * dy) >= 0
-  },
-  checkCollision: function checkCollision() {
-    var lines = [
-      [this.ship.vertices[0],this.ship.vertices[1]],
-      [this.ship.vertices[1],this.ship.vertices[3]],
-      [this.ship.vertices[3],this.ship.vertices[0]]
-    ]
-    for (var i = 0; i < this.asteroids.length; i++){
+      // Get the x point for each line segment at Asteroid center y
+      // the getXCoord should only ever return 2 valid x coords
+      // (the last will be off the line segment or on a horizontal segment)
+      var j = 0;
       for(var n = 0; n < lines.length; n++){
-        if(this.lineCircleCollide(lines[n], [this.asteroids[i].x, this.asteroids[i].y], this.asteroids[i].radius)){
+        xCoord = this.ship.getXCoord( lines[n], asteroid.y); // THIS FUNCTION DOESNT WORK - Maybe rounding errors?
+        if (xCoord !== null) {
+          xCoords[j]= xCoord;
+          j++;
+        }
+      }
+
+      console.log(xCoords);
+      // if Asteroid's center x is less then OR greater then BOTH boundary x coords then it is outside them
+      if (xCoords[0] && xCoords[1]) {
+        if((asterX < xCoords[0] && asterX < xCoords[1]) || (asterX > xCoords[0] && asterX > xCoords[1])) {
+          // No Collision
+        } else {
           console.log("collide!");
           this.gameOver = true;
           return true;
         }
       }
+
+      return false;
     }
   },
   addAsteroid: function addAsteroid(options){
@@ -101,6 +83,7 @@ ASTEROIDS.Model = {
       if(this.asteroids[i].dirty){
         this.asteroids[i].tic();
         this.screenWrap(this.asteroids[i]);
+        this.checkCollision(this.asteroids[i]);
       }
     }
   },
@@ -213,6 +196,38 @@ _AM.Ship = function Ship(coords){
       [this.x + this.dx(this.direction + Math.PI, this.radius*2/5), this.y + this.dy(this.direction + Math.PI,this.radius*2/5)],
       [this.x + this.dx(this.direction - 3*Math.PI/4), this.y + this.dy(this.direction - 3*Math.PI/4)]
     ]
+  }
+
+  this.getBoundaryVertices = function getBoundaryVertices(radius) {
+    radius += this.radius;
+
+    return [
+              [this.x + this.dx(this.direction, radius), this.y + this.dy(this.direction, radius)],
+              [this.x + this.dx(this.direction + 3*Math.PI/4, radius), this.y + this.dy(this.direction + 3*Math.PI/4, radius)],
+              [this.x + this.dx(this.direction - 3*Math.PI/4, radius), this.y + this.dy(this.direction - 3*Math.PI/4, radius)]
+           ]
+  }
+
+  this.getXCoord = function getXCoord(lineSegment, y) {
+    // set lineSegment parameters based off end points of lineSegment
+    slope = (lineSegment[1][1] - lineSegment[0][1])/(lineSegment[1][0] - lineSegment[0][0]);
+    offset = lineSegment[1][1] - slope*lineSegment[1][0];
+
+    // Calculate X for that lineSegment equation
+    var x;
+    // Cannot determine x value off y if slope is zero
+    if (slope !== 0) {
+      x = (y - offset)/slope;
+
+      // Make sure that x lies within the lineSegment
+      if ((x < lineSegment[0][0] && x < lineSegment[1][0]) || (x > lineSegment[0][0] && x > lineSegment[1][0])) {
+        x = null;
+      }
+    } else {
+      x = null;
+    }
+
+    return x;
   }
 }
 
