@@ -16,6 +16,10 @@ ASTEROIDS.Controller = {
     window.requestAnimationFrame = requestAnimationFrame;
   },
   animate: function animate(){
+    if(this.model.gameOver){
+      this.gameOver();
+      return;
+    }
     requestAnimationFrame(function(){ASTEROIDS.Controller.animate()});
     this.model.moveAsteroids();
     this.view.renderAsteroids(this.model.asteroids);
@@ -23,5 +27,8 @@ ASTEROIDS.Controller = {
     this.model.checkCollision();
     this.model.ship.setVertices();
     this.view.renderShip(this.model.ship);
+  },
+  gameOver: function gameOver(){
+    this.view.gameOver();
   }
 }

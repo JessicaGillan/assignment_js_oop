@@ -21,22 +21,73 @@ ASTEROIDS.Model = {
       this.addAsteroid();
     }
   },
-  checkCollision: function checkCollision() {
-    var ship = new SAT.Polygon(new SAT.Vector(ASTEROIDS.Model.ship.vertices[0][0], ASTEROIDS.Model.ship.vertices[0][1]),
-                               [new SAT.Vector(ASTEROIDS.Model.ship.vertices[0][0], ASTEROIDS.Model.ship.vertices[0][1]),
-                                new SAT.Vector(ASTEROIDS.Model.ship.vertices[1][0], ASTEROIDS.Model.ship.vertices[1][1]),
-                                new SAT.Vector(ASTEROIDS.Model.ship.vertices[3][0], ASTEROIDS.Model.ship.vertices[3][1])] )
-
-    var circle;
-    for (var i = 0; i < ASTEROIDS.Model.asteroids.length; i++){
-      circle =  new SAT.Circle(new SAT.Vector(ASTEROIDS.Model.asteroids[i].x, ASTEROIDS.Model.asteroids[i].y, ASTEROIDS.Model.asteroids[i].radius));
-      if(SAT.testPolygonCircle( ship, circle )){
-        console.log("collide!")
-      }
-
+  pointCircleCollide: function pointCircleCollide(point, circle, r) {
+    if (r===0) return false
+    var dx = circle[0] - point[0]
+    var dy = circle[1] - point[1]
+    return dx * dx + dy * dy <= r * r
+  },
+  lineCircleCollide: function lineCircleCollide(line, circle, radius) {
+    var a = line[0],
+        b = line[1]
+    //check to see if start or end points lie within circle
+    if (this.pointCircleCollide(a, circle, radius)) {
+      return true
+    } if (this.pointCircleCollide(b, circle, radius)) {
+      return true
     }
 
-    // SAT.testPolygonCircle( ship, circle);
+    var x1 = a[0],
+        y1 = a[1],
+        x2 = b[0],
+        y2 = b[1],
+        cx = circle[0],
+        cy = circle[1];
+
+    //vector d
+    var dx = x2 - x1
+    var dy = y2 - y1
+
+    //vector lc
+    var lcx = cx - x1
+    var lcy = cy - y1
+
+    //project lc onto d, resulting in vector p
+    var dLen2 = dx * dx + dy * dy //len2 of d
+    var px = dx
+    var py = dy
+    if (dLen2 > 0) {
+      var dp = (lcx * dx + lcy * dy) / dLen2
+      px *= dp
+      py *= dp
+    }
+
+    var nearest = []
+    nearest[0] = x1 + px
+    nearest[1] = y1 + py
+
+    //len2 of p
+    var pLen2 = px * px + py * py
+
+    //check collision
+    return this.pointCircleCollide(nearest, circle, radius)
+    && pLen2 <= dLen2 && (px * dx + py * dy) >= 0
+  },
+  checkCollision: function checkCollision() {
+    var lines = [
+      [this.ship.vertices[0],this.ship.vertices[1]],
+      [this.ship.vertices[1],this.ship.vertices[3]],
+      [this.ship.vertices[3],this.ship.vertices[0]]
+    ]
+    for (var i = 0; i < this.asteroids.length; i++){
+      for(var n = 0; n < lines.length; n++){
+        if(this.lineCircleCollide(lines[n], [this.asteroids[i].x, this.asteroids[i].y], this.asteroids[i].radius)){
+          console.log("collide!");
+          this.gameOver = true;
+          return true;
+        }
+      }
+    }
   },
   addAsteroid: function addAsteroid(options){
     this.asteroids.push( new this.Asteroid(options));
@@ -82,21 +133,21 @@ ASTEROIDS.Model = {
   screenWrap: function screenWrap(obj){
     // Right Side
     if(obj.x - obj.radius >= this.width){
-      console.log("off the right");
+      // console.log("off the right");
       obj.x -= this.width;
 
       // Left Side
     } else if(obj.x + obj.radius <= 0) {
-      console.log("off the left side");
+      // console.log("off the left side");
       obj.x += this.width;
     }
     // Bottom Side
     if(obj.y - obj.radius >= this.height) {
-      console.log("off the bottom");
+      // console.log("off the bottom");
       obj.y -= this.height;
       // Top Side
     } else if(obj.y + obj.radius <= 0) {
-      console.log("off the top");
+      // console.log("off the top");
       obj.y += this.height;
     }
   }

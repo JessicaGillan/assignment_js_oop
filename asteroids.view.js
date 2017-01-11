@@ -148,7 +148,8 @@ ASTEROIDS.View = {
       this.astrdContext.stroke();
     }
   },
-  renderSpaceship: function renderSpaceship(){
-
+  gameOver: function gameOver(){
+    this.shipContext.font="50vh Verdana";
+    this.shipContext.strokeText("Game Over", this.width/4, this.height*.75, this.width/2)
   }
 }
