@@ -1,4 +1,4 @@
-# Asteroids
+# Floating Asteroids
 Objectify! Construct! Prototype!  Win.
 
 [A JavaScript project using objects, constructors and prototypes](http://www.vikingcodeschool.com)
